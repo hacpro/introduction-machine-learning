@@ -2,18 +2,41 @@
 
 # install.packages("ggplot2", dependencies = T)
 # install.packages("GGally", dependencies = T)
-
 # install.packages("plot3D", dependencies = T)
+# install.packages("e1071")
 
 library(ggplot2)
 library(GGally)
 library(plot3D)
+library(e1071)
+
+
+
+# Some setup for our investigation
 
 buildings <- read.csv2("C:\\Users\\ch0125\\Dropbox\\Machine Learning\\part_1_data.csv", sep = ",")
 
 # We take a look at all the features we have
 summary(buildings)
 
+# And some basis statics for price
+summary(buildings$price)
+hist(buildings$price, breaks = 200, prob = T)
+abline(v = mean(buildings$price),
+     col = "blue",
+     lwd = 1)
+abline(v = median(buildings$price),
+     col = "red",
+     lwd = 1)
+lines(density(buildings$price), 
+ lwd = 2, # thickness of line
+ col = "gray")
+
+# Some more advanced stuff - nobody actually cares
+skewness(buildings$price)
+kurtosis(buildings$price)
+
+# we can do this a little nicer - but not now
 
 # Quesion 1: How many
 # How can we guess the price of a building? Relevant features?
@@ -46,9 +69,17 @@ summary(lm(price ~ sqft + price_per_sqft, buildings))
 # Question 2: Is this A or B
 # -----------------------------------------------------------------------------------------------
 
-# Any suggestions what may be a good indicator?
+# How can we determine if a house is from sf or ny?
 
-# look at the model
+# Lets look at the correlation matrix
+df2 <- buildings
+df2$in_sf <- as.factor(buildings[, 1])
+ggpairs(data = df2, columns = c(4, 5, 6, 7, 8), title = "Korrelationsmatrix",
+        mapping = ggplot2::aes(colour = in_sf))
+
+# Any suggestions what may be a good indicator ?
+
+# If suggestions: We learned regression, so this must be different for both
 df <- buildings
 df$in_sf <- as.factor(buildings[, 1])
 ggplot(df, aes(sqft, price, colour = in_sf)) +
@@ -56,11 +87,7 @@ ggplot(df, aes(sqft, price, colour = in_sf)) +
   geom_smooth(method = "lm")
 
 
-# Lets look at the correlation matrix
-df2 <- buildings
-df2$in_sf <- as.factor(buildings[, 1])
-ggpairs(data = df2, columns = c(4, 5, 6, 7, 8), title = "Korrelationsmatrix",
-        mapping = ggplot2::aes(colour = in_sf))
+
 
 
 
