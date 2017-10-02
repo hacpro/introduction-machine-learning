@@ -11,6 +11,10 @@ library(plot3D)
 library(e1071)
 
 
+# Visualisierung von 'Agenda' oder ML-Uebersicht 
+# mit http://www.bioconductor.org/packages/2.8/bioc/html/Rgraphviz.html oder
+# https://cran.r-project.org/web/packages/data.tree/vignettes/data.tree.html
+
 
 # Some setup for our investigation
 
@@ -85,9 +89,6 @@ df$in_sf <- as.factor(buildings[, 1])
 ggplot(df, aes(sqft, price, colour = in_sf)) +
   geom_point() +
   geom_smooth(method = "lm")
-
-
-
 
 
 
