@@ -36,12 +36,23 @@ typisierung$AddChild("dynamisch")
 typisierung$AddChild("implizit")
 typisierung$AddChild("schwach")
 
+why <- r$AddChild("Warum R?")
+why$AddChild("Community")
+why$AddChild("Packages")
+why$AddChild("Statistischer Hintergrund")
+ml <- why$AddChild("Data Science")
+neben <- ml$AddChild("Besides")
+neben$AddChild("Julia and Co.")
+neben$AddChild("Python")
+
 r$AddChild("RStudio IDE")
 r$AddChild("Open Source")
 interpretiert <- r$AddChild("Intepretiert")
 optimierungen <- interpretiert$AddChild("Optimierungen")
 optimierungen$AddChild("Vorkompilierte Funktionen")
 optimierungen$AddChild("JIT Kompiler")
+
+# https://www.indeed.com/jobtrends/q-python-and-%28%22machine-learning%22-or-%22data-science%22%29-q-R-and-%28%22machine-learning%22-or-%22data-science%22%29-q-Java-and-%28%22machine-learning%22-or-%22data-science%22%29-q-Javascript-and-%28%22machine-learning%22-or-%22data-science%22%29-q-C-and-%28%22machine-learning%22-or-%22data-science%22%29-q-C++-and-%28%22machine-learning%22-or-%22data-science%22%29-q-Julia-and-%28%22machine-learning%22-or-%22data-science%22%29-q-scala-and-%28%22machine-learning%22-or-%22data-science%22%29.html?cm_mc_uid=01576181450615070286628&cm_mc_sid_50200000=1507028662
 
 plotGraph(r)
 
@@ -50,7 +61,8 @@ plotGraph(r)
 plotGraph <- function(node)
 {
   SetGraphStyle(node, rankdir = "TB")
-  SetEdgeStyle(node, arrowhead = "vee", color = "grey35", penwidth = 2)
+  SetEdgeStyle(node, arrowhead = "vee", color = "grey35", 
+               penwidth = 2)
   SetNodeStyle(node, style = "filled,rounded", shape = "box", 
                fillcolor = "GreenYellow", 
                fontname = "Arial", tooltip = GetDefaultTooltip)
