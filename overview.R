@@ -15,10 +15,11 @@ library(e1071)
 # mit http://www.bioconductor.org/packages/2.8/bioc/html/Rgraphviz.html oder
 # https://cran.r-project.org/web/packages/data.tree/vignettes/data.tree.html
 
+# Set the working directory
+setwd("c:/source/introduction-machine-learning")
 
 # Some setup for our investigation
-
-buildings <- read.csv2("C:\\Users\\ch0125\\Dropbox\\Machine Learning\\part_1_data.csv", sep = ",")
+buildings <- read.csv2("buildings.csv", sep = ",")
 
 # We take a look at all the features we have
 summary(buildings)
