@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.26730.16
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{DA7A21FA-8162-4350-AD77-A8D1B671F3ED}") = "HelloR", "HelloR\HelloR.rxproj", "{3283363D-AC53-4D2F-8B0C-0124AFD330FB}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{3283363D-AC53-4D2F-8B0C-0124AFD330FB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3283363D-AC53-4D2F-8B0C-0124AFD330FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3283363D-AC53-4D2F-8B0C-0124AFD330FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3283363D-AC53-4D2F-8B0C-0124AFD330FB}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {3E5FC7F1-BFF8-4BCE-90CD-79AAA87C1025}
+	EndGlobalSection
+EndGlobal
