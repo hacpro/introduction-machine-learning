@@ -451,9 +451,7 @@ ggplot(iris_set, aes(Petal.Length, Petal.Width,
 
 ggplot(iris, aes(Petal.Length, Petal.Width, 
                      color = Species)) + 
-  geom_point()
-
-## Wenn Zeit noch die Confusion Matrix anzeigen
+                        geom_point()
 
 # Konfusionsmatrix anzeigen
 table(iris_set$cluster, 
@@ -465,13 +463,17 @@ table(iris_set$cluster,
 # 1. Unsupervised Learning muss ohne Training auskommen
 # 2. k-means ist ein bekannter Clustering-Algorithmus
 
-# Es fehlt noch: Reinforcement Learning
 
-# Question 3: Is this weird?
-# Different dimensional Visualizations (why not the Kernel Trick, 3.3. Romeo)
+# Offen
 
-# Quesion 4: How is it organized?
-# Clustering
+# Frage: Ist das seltsam
+#   Different dimensional Visualizations (why not the Kernel Trick, 3.3. Romeo)
+#   Anomaly detection algorithm
 
-# Quesion 5: What should I do next?
-# Recommenders
+# Frage: Was soll ich als nächstes tun
+#   Recommenders
+#   Reinforcement Learning
+
+# Weiterführende Themen
+# Ensemble Learning: Randon Forest
+# Deep Learning: Neural Networks mnist
