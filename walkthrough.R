@@ -8,7 +8,8 @@
 # install.packages("reshape2", dependencies = T)
 # install.packages("e1071", dependencies = T)
 # install.packages("caret", dependencies = T)
-
+# install.packages("rpart", dependencies = T)
+# install.packages("rpart.plot", dependencies = T)
 
 ## Es reicht wenn ihr konzeptionell wisst, was passiert.
 ## Der Code koennt ihr dann alle runterladen und ausfuehren/analysieren
@@ -27,11 +28,14 @@ library(e1071)
 library(scatterplot3d)
 library(reshape2)
 library(caret)
+library(rpart)
+library(rpart.plot)
 
 ## TODO:
 ## Was ist elevation im Datensatz?
 ## Was kann Visual Studio alles?
-## Korrelationsmatrix einsetzen irgendwo
+## Korrelationsmatrix einsetzen irgendwo, resp. entweder bei fourfoldplot oder
+##    bei erster Modellevaluation
 ## Precision and Recall -> Folien
 ## Df's loeschen
 
@@ -242,16 +246,105 @@ ggpairs(data = df2, columns = c(4, 5, 6, 7, 8), title = "Korrelationsmatrix",
 
 
 ## Es sind definitiv Muster erkennbar, aber sie sind nichth umbedingt
-## direkt ersichtlich
+## direkt ersichtlich, resp. die Trennungen koennen nicht klar gezogen werden
 
 
+## Jetzt starten wir mit Machine Learning
+## Muster in Daten zu finden ist eine Aufgabe für ML
+## ML-Algorithmen benutzen statistisches Lernen um Grenzen
+## zu bestimmen
 
-# Praezisierte Konfusionsmatrix erstellen
-confusionMatrix(as.integer(as.logical(
-                    (buildings$elevation > 73 & buildings$price_per_sqft > 2250)
-                    )), 
+
+# Starten wir mit einem Entscheidungsbaum (Decision Tree)
+
+# Schauen wir uns noch einmal unsere erste Regel (> 73m) an
+df <- buildings
+df$in_sf <- as.factor(buildings[, 1])
+ggplot(df, aes(in_sf, elevation, colour = in_sf)) +
+  geom_point(alpha = .2, size = 5)
+
+# Als Histogramm, damit die Dichten klarer ersichtlich sind
+df %>% 
+  ggplot(aes(elevation, fill=in_sf)) +
+  geom_histogram(aes(y = ..density..), position = "identity",
+                 alpha = .4)
+
+## Obwohl ein Gebäude in SF auf 73m liegt, die meisten liegen
+## einiges darunter
+
+## Ein Entscheidungsbaum verwendet Entscheidungen um Muster
+## in Daten zu erkennen, lets have a look
+
+## Unser erster Versuch mit einer Entscheidung erbrachte 63%
+## Wir hatten viele false negatives
+
+# Confusion Matrix darstellen (viele false negatives)
+fourfoldplot(table(in_sf, buildings$in_sf), 
+             color = c("#CC6666", "#99CC99"),
+             conf.level = 0, margin = 1, 
+             main = "Confusion Matrix")
+
+# Verschieben wir die Hoehengrenze (e.g. 50m), dann gibt es mehr (false positives)
+fourfoldplot(table(as.integer(as.logical(buildings$elevation > 50)), 
+                   buildings$in_sf), 
+             color = c("#CC6666", "#99CC99"),
+             conf.level = 0, margin = 1, 
+             main = "Confusion Matrix")
+
+## Es gibt verschiedene mathematische Verfahren den besten
+## Kompromiss herauszufinden (gini index, cross entropy)
+
+# Der beste Wert liegt bei ungefaehr 28m
+fourfoldplot(table(as.integer(as.logical(buildings$elevation > 28)), 
+                   buildings$in_sf), 
+             color = c("#CC6666", "#99CC99"),
+             conf.level = 0, margin = 1, 
+             main = "Confusion Matrix")
+
+
+## Wir sehen, auch der beste Wert ist ein Kompromiss
+## Es braucht also weitere Forks (Unterteilungen des Teile)
+## Gluecklicherweise haben wir R
+
+# Reproduzierbarkeit sicherstellen
+set.seed(1234)
+
+# Klassischen Descision Tree erstellen
+dtree <- rpart(in_sf ~ ., buildings, method = "class")
+
+# Anhand von Modell Klassifizierung machen
+in_sf_tree <- predict(dtree, buildings, type = "class")
+
+# Unser Resultat begutachten
+confusionMatrix(in_sf_tree, 
                 buildings$in_sf,
                 dnn = c("Prediction", "Reference"))
+
+# Accuracy : 0.9146
+# Sensitivity : 0.9464
+# Specificity : 0.8881
+
+# Schauen wir uns diesen Baum an (Vorteil von Descision Trees)
+rpart.plot(dtree)
+
+## Das ist verdammt gut, was denkst ihr?
+## Overfitting!
+## Wie begegnen wir Overfitting? Yes, cross-validation!
+
+
+
+# Tiefe des Baumes bestimmen
+dtree$cptable
+plotcp(dtree) # Baum zeigt Komplexitaet (cp) vs cross-validated error
+
+## Cross validation 
+## cross-validated error: Je hoeher dieser Wert, desto genauer ist der Baum
+## und desto mehr Fehler gibt es bei neuen Daten (cross validation)
+
+## Empfehlung ist Knoten am weitesten Links unterhalb Linie
+## Haengt mit standard error zusammen (se < min(x-val e))
+
+dtree_pruned <- prune(dtree, cp = .02679)
 
 
 
