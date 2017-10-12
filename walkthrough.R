@@ -7,6 +7,16 @@
 # install.packages("scatterplot3d", dependencies = T)
 # install.packages("reshape2", dependencies = T)
 # install.packages("e1071", dependencies = T)
+# install.packages("caret", dependencies = T)
+
+
+## Es reicht wenn ihr konzeptionell wisst, was passiert.
+## Der Code koennt ihr dann alle runterladen und ausfuehren/analysieren
+## Deshalb: Ich gebe so viel Gas wie möglich und ihr bremst wo voellig 
+## unlar
+
+## Frage vorab: Wer hat keine Ahnung von Statistik 
+## (Regression, Bestimmtheitsmass etc.)
 
 
 # Packages referenzieren
@@ -16,11 +26,14 @@ library(plotly)
 library(e1071)
 library(scatterplot3d)
 library(reshape2)
-
+library(caret)
 
 ## TODO:
 ## Was ist elevation im Datensatz?
 ## Was kann Visual Studio alles?
+## Korrelationsmatrix einsetzen irgendwo
+## Precision and Recall -> Folien
+## Df's loeschen
 
 # Arbeitsverzeichnis setzen
 setwd("c:/source/introduction-machine-learning")
@@ -139,25 +152,110 @@ advanced_plot %>% add_trace(z = price_surface,
 
 
 
-# Question 2: Is this A or B
-# -----------------------------------------------------------------------------------------------
+# Frage: Ist ein Haus aus San Francisco oder New York
+# ------------------------------------------------------------------------
 
-# How can we determine if a house is from sf or ny?
+## Kategorisieren (NYC oder SF) in Machine Learning Jargon ist
+## Classification
 
-# Lets look at the correlation matrix
+## Zuerst Intuition
+## Hat jemand eine gute Idee? Was sagt die Intuition (SF ist huegelig)
+## elevation: Schauen wir uns die Hoehe in den verschiedenen Staedten an
+
+# Anzeigen von Erhoehung, gruppiert nach Stadt
+df <- buildings
+df$in_sf <- as.factor(buildings[, 1])
+ggplot(df, aes(in_sf, elevation, colour = in_sf)) +
+  geom_point(alpha = .2, size = 5)
+
+## Wer hat also einen Vorschlag?
+## Haeuser ueber 73 Meter sollten Klassifiziert werden als in_sf
+
+# Datensatz mit gewonnener Erkenntnis klassifizieren
+in_sf <- as.integer(as.logical(buildings$elevation > 73))
+
+
+# Richtige Kategorisierungen bestimmen
+classifications <- df$in_sf == in_sf
+all_classifications <- length(classifications)
+correct_classifications <- sum(classifications == T)
+
+# Prozent richtige bestimmen
+correct_classifications / all_classifications
+
+## [1] 0.6443089 -> 65% Korrekt -> nicht schlecht
+
+## Ausflug nach Precision and Recall
+
+# Konfusionsmatrix erstellen
+confusionMatrix(in_sf, 
+                buildings$in_sf,
+                dnn = c("Prediction", "Reference"))
+
+## Matrix erklaren und unseren Wert und Sensitivity und Specifity referenzieren
+
+
+## Wir wollen das ganze noch etwas verfeinern. Vorschlaege?
+## Preis pro Quadratmeter?
+
+## Schauen wir uns unsere Daten anhand unserem neuen Wissen an
+## und visualisieren m2-Preis und Hoehe
+
+# m2-Preis und Hohe darstellen nach Stadt
+ggplot(df, aes(price_per_sqft, elevation, colour = in_sf)) +
+  geom_point(alpha = .5) 
+
+## Im Scatterplot koennen wir erkennen, dass man bei den tieferen
+## Haeuser eine weitere Praezisierung machen kann (ca. bei 2300$ pro sqft)
+## Dimensions in a data set are called features, predictors, or variables.
+
+
+
+# Einzeichnen was wir inzwischen wissen
+ggplot(df, aes(price_per_sqft, elevation, colour = in_sf)) +
+  geom_point(alpha = .5) + 
+  annotate("rect", xmin=0,xmax=Inf, ymin=73, ymax=Inf, alpha=0.2, fill="#00BFC4") + 
+  annotate("rect", xmin=2250,xmax=Inf, ymin=0, ymax=73, alpha=0.2, fill="#F8766D") 
+
+
+## Identifying boundaries in data using math is the essence of statistical learning.
+
+
+## Nun haben wir die sicheren, aber was mit denen im nicht markierten Bereich?
+## Wir brauchen mehr Informationen
+
+# Korrelationsmatrix darstellen
+df2 <- buildings
+df2$in_sf <- as.factor(buildings[, 1])
+ggpairs(data = df2, columns = c(2,3, 4, 5, 6, 7, 8), title = "Korrelationsmatrix",
+        mapping = ggplot2::aes(colour = in_sf),
+        cardinality_threshold = 16)
+
+## Unsere Daten haben 7 Dimensionen
+## Kardinale Daten anders angezeigt
+
+## Wir entfernen kategoriale Variablen mit zu vielen Varianten
 df2 <- buildings
 df2$in_sf <- as.factor(buildings[, 1])
 ggpairs(data = df2, columns = c(4, 5, 6, 7, 8), title = "Korrelationsmatrix",
         mapping = ggplot2::aes(colour = in_sf))
 
-# Any suggestions what may be a good indicator ?
 
-# If suggestions: We learned regression, so this must be different for both
-df <- buildings
-df$in_sf <- as.factor(buildings[, 1])
-ggplot(df, aes(sqft, price, colour = in_sf)) +
-  geom_point() +
-  geom_smooth(method = "lm")
+## Es sind definitiv Muster erkennbar, aber sie sind nichth umbedingt
+## direkt ersichtlich
+
+
+
+# Praezisierte Konfusionsmatrix erstellen
+confusionMatrix(as.integer(as.logical(
+                    (buildings$elevation > 73 & buildings$price_per_sqft > 2250)
+                    )), 
+                buildings$in_sf,
+                dnn = c("Prediction", "Reference"))
+
+
+
+
 
 
 
