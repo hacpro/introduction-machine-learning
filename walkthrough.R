@@ -30,6 +30,7 @@ library(reshape2)
 library(caret)
 library(rpart)
 library(rpart.plot)
+library(datasets)
 
 ## TODO:
 ## Was ist elevation im Datensatz?
@@ -331,7 +332,30 @@ rpart.plot(dtree)
 ## Overfitting!
 ## Wie begegnen wir Overfitting? Yes, cross-validation!
 
+# Wir teilen unsere Daten in training und test set (70%/30%)
+train_rows <- sample(nrow(buildings), .7*nrow(buildings))
+train_set <- buildings[train_rows,]
+validation_set <- buildings[-train_rows,]
 
+# Erstellen das Modell noch einmal neu mit dem Training set
+dtree <- rpart(in_sf ~ ., train_set, method = "class")
+
+# Jetzt klassifizieren wir das Test set
+in_sf_tree <- predict(dtree, validation_set, type = "class")
+
+# und schauen uns diese Konfusionsmatrix an
+confusionMatrix(in_sf_tree, 
+                validation_set$in_sf,
+                dnn = c("Prediction", "Reference"))
+
+## Accuracy : 0.8649
+## Sensitivity : 0.8387         
+## Specificity : 0.8837
+
+## Falls Zeit vorhanden
+
+# ------------------------------------------------------------------------
+# Beschneidung des Baumes mit cross validation error
 
 # Tiefe des Baumes bestimmen
 dtree$cptable
@@ -345,12 +369,103 @@ plotcp(dtree) # Baum zeigt Komplexitaet (cp) vs cross-validated error
 ## Haengt mit standard error zusammen (se < min(x-val e))
 
 dtree_pruned <- prune(dtree, cp = .02679)
+# ------------------------------------------------------------------------
+
+# Wrap up
+# 1. Machine Learning identifiziert Grenzen und Muster 
+#   mit statistischem Lernen
+# 2. Wir kennen ersten ML-Methode: Descision Trees
+# 3. Wissen was Overfitting ist und wie man sie umgeht
+# 4. Kennen Cross-Validation
 
 
+## Welcher Art von ML hatten wir also hier?
+## Schauen wir uns als naechstes unsupervised learning an
+## Die wichtigsten Konzepte kenn wir nun, wir koenne jetzt also
+## ein bisschen schneller voran gehn
+
+## Nehmen wir einen Datensatz bei dem wir
+# -https://www.r-bloggers.com/k-means-clustering-in-r/
+
+## Schauen wir uns einen unverbindlichen Datensatz an: Blumen
+
+# Und jetzt etwas unsupervised learning
+
+# Wir schauen uns den Iris-Datensatz an. 
+iris_set <- iris[, -5]
+head(iris_set)
+
+## Sepal = Kelch, Petal = Blütenblatt
+
+# Schauen wir uns auch hier die Daten an
+ggpairs(data = iris_set, title = "Korrelationsmatrix")
+
+## Sieht nach zwei Gruppen aus oder? (zwei Taeler, zwei Gruppen)
+
+# Wir lassen R einmal zwei Clusters erstellen
+clusters <- kmeans(iris_set, 
+                   2, # Anzahl erwarteter Cluster 
+                   nstart = 20)
+
+# Und schauen wir uns diese Clusters einmal an
+clusters
+
+## Within cluster sum of squares by cluster:
+##   [1]  28.55208 123.79588
+## (between_SS / total_SS =  77.6 %)
+## Kurz: Rund 78 der Variation im Dataset wird
+## durch das Clustering erklaert
+
+# Visualisieren wir diese einmal in unserer Korrelationsmatrix
+iris_set$cluster <- as.factor(clusters$cluster)
+ggpairs(data = iris_set,
+        columns = c(1,2,3,4),
+        mapping = ggplot2::aes(colour = cluster),
+        title = "Korrelationsmatrix")
+
+## Was wenn wir drei Clusters wollen wuerden?
+## (Weil wir wissen, dass es drei gibt, oder wir drei haben wollen
+## e.g. high-performer und low-performer)
+
+# Und wir probieren nun mal 3 Clusters
+clusters <- kmeans(iris_set, 
+                   3, # Anzahl erwarteter Cluster 
+                   nstart = 20)
+
+# Statistik ausgeben
+clusters$betweenss / clusters$totss
+# [1] 0.8858283
+
+## Sind wir jetzt besser? Klar, dass es immer besser wird.
+
+# Schauen wir uns unsere neuen Centers an
+iris_set$cluster <- as.factor(clusters$cluster)
+ggplot(iris_set, aes(Petal.Length, Petal.Width, 
+                     color = cluster)) + 
+  geom_point()
+
+# Und jetzt schauen wir uns die Spezien dieser Blumen 
+# im urspruenglichen set an
+
+## Jaaa, die habe ich unterschlagen
+
+ggplot(iris, aes(Petal.Length, Petal.Width, 
+                     color = Species)) + 
+  geom_point()
+
+## Wenn Zeit noch die Confusion Matrix anzeigen
+
+# Konfusionsmatrix anzeigen
+table(iris_set$cluster, 
+                iris$Species,
+                dnn = c("Prediction", "Reference"))
 
 
+# Wrap-up
+# 1. Unsupervised Learning muss ohne Training auskommen
+# 2. k-means ist ein bekannter Clustering-Algorithmus
 
-
+# Es fehlt noch: Reinforcement Learning
 
 # Question 3: Is this weird?
 # Different dimensional Visualizations (why not the Kernel Trick, 3.3. Romeo)
