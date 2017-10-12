@@ -1,74 +1,142 @@
 
 
+# Packages von oeffentlichem Repo installieren 
 # install.packages("ggplot2", dependencies = T)
 # install.packages("GGally", dependencies = T)
-# install.packages("plot3D", dependencies = T)
-# install.packages("e1071")
+# install.packages("plotly", dependencies = T)
+# install.packages("scatterplot3d", dependencies = T)
+# install.packages("reshape2", dependencies = T)
+# install.packages("e1071", dependencies = T)
 
+
+# Packages referenzieren
 library(ggplot2)
 library(GGally)
-library(plot3D)
+library(plotly)
 library(e1071)
+library(scatterplot3d)
+library(reshape2)
 
 
-# Visualisierung von 'Agenda' oder ML-Uebersicht 
-# mit http://www.bioconductor.org/packages/2.8/bioc/html/Rgraphviz.html oder
-# https://cran.r-project.org/web/packages/data.tree/vignettes/data.tree.html
+## TODO:
+## Was ist elevation im Datensatz?
+## Was kann Visual Studio alles?
 
-# Set the working directory
+# Arbeitsverzeichnis setzen
 setwd("c:/source/introduction-machine-learning")
 
-# Some setup for our investigation
+# File zur Untersuchung laden
 buildings <- read.csv2("buildings.csv", sep = ",")
 
-# We take a look at all the features we have
+# Eine Uebersicht der Daten  anzeigen
+head(buildings)
 summary(buildings)
 
-# And some basis statics for price
-summary(buildings$price)
-hist(buildings$price, breaks = 200, prob = T)
-abline(v = mean(buildings$price),
-     col = "blue",
-     lwd = 1)
-abline(v = median(buildings$price),
-     col = "red",
-     lwd = 1)
-lines(density(buildings$price), 
- lwd = 2, # thickness of line
- col = "gray")
+## Kurz erklaren was fuer Daten wir hier vor uns haben
 
-# Some more advanced stuff - nobody actually cares
+# Wir wollen uns als ersten die Preise anschauen
+summary(buildings$price)
+
+## Mean und Median erklaeren
+
+# Histogramm der Preise ausgeben
+hist(buildings$price, breaks = 200, prob = T)
+
+# Mittelwert und Median darstellen
+abline(v = mean(buildings$price),
+       col = "blue",
+       lwd = 1)
+abline(v = median(buildings$price),
+     col = "blue",
+     lwd = 1, 
+     lty = 2)
+
+
+# Dichteverteilung einzeichnen
+lines(density(buildings$price),  
+ lwd = 2 # thickness of line
+ )
+
+## Die kleinen Statistiker haben es bereits herausgefunden
+## wir haben eine positive Schiefe / rechtsschiefe Verteilung
+
+# Kurtosis und Schiefe ausgeben
 skewness(buildings$price)
 kurtosis(buildings$price)
 
-# we can do this a little nicer - but not now
+## Das ganze koennen wir natuerlich auch etwas schoener machen
+## aber das werden wir spaeter sehen
 
-# Quesion 1: How many
-# How can we guess the price of a building? Relevant features?
-# -----------------------------------------------------------------------------------------------
 
-# Regression with price
-# if there are any suggestions we look at the regression (e.g. price and sqft)
+# Frage 1: Wieviel kostet ein Gebaeude?
 
-# look at the model
+## Gesetzt wir haetten keinen Preis, wie koennten wir diesen annähnern. 
+## Entweder neue Daten oder fehlender Preis
+# --------------------------------------------------------------------------
+
+## Hat jemand eine Idee? 
+## Welche Eigenschaften (Features) in unserem Datensatz könnten
+## dafuer relevant sein?
+
+## Wenn jemand eine Idee hat nehmen wir diese Eigenschaft und machen eine Regression
+## (e.g. price or sqft)
+
+# Regression machen
+summary(lm(price ~ sqft, buildings))
+## Adjusted R-squared: 0.5107
+
+## Kurz Lineare Regression erklaeren (p-value, R-Squared)
+## Klammerbemkerung: Andere Formen von Regression wie Logistische Regression
+
+# Gleiches Regressionsmodell visualisieren
 ggplot(buildings, aes(sqft, price, col = buildings$in_sf)) +
   geom_point() +
   geom_smooth(method = "lm")
 
-# footnote other types of regression
+## Erklaeren:
+## Je naeher die Punkte an der Linie, desto besser unser Modell
+## Nicht schlecht, aber das muss noch besser gehen
 
-# print our model
-summary(lm(price ~ sqft, buildings))
-# not that good? we need more variables
 
-# Problem with visualization (price_per_sqft is a joke)
+# Neues Modell mit mehreren Variablen
+## Vorschlaege? Wenn nicht bereits gekommen..
+
 summary(lm(price ~ sqft + price_per_sqft, buildings))
-# pretty good, but we need other types of visualization
+## Adjusted R-squared:  0.873
+## Ziemlich gut, aber wie visualisien wir das?
 
-# Visual Studio cannot display interactive graphs
-# example(persp3D)
-# scatter3D(buildings$sqft, buildings$price_per_sqft, buildings$price, buildings,
-#    col = "blue", size = 1, type = "s", main = "3D Quadratic Model Fit with Log of Income")
+# Erster Ansatz: Einfacher 3D-Plot
+plot <- scatterplot3d(buildings$sqft, buildings$price_per_sqft, buildings$price)
+model  <- lm(price ~ sqft + price_per_sqft, buildings)
+plot$plane3d(model)
+
+# Etwas ausgefeiltere Variante
+advanced_plot <- plot_ly(buildings, x = ~sqft, y = ~price_per_sqft, 
+        z = ~price,
+        color = ~price,
+        type = "scatter3d", 
+        mode = "markers")
+
+
+# ------------------------------------------------------------------------
+# Und noch die Regressionsebene fuer die welche es wissen wollen
+graph_reso <- 10
+axis_x <- seq(min(buildings$sqft), max(buildings$sqft), 
+              by = graph_reso)
+axis_y <- seq(min(buildings$price_per_sqft), max(buildings$price_per_sqft), 
+              by = graph_reso)
+price_surface <- expand.grid(sqft = axis_x,
+                             price_per_sqft = axis_y, KEEP.OUT.ATTRS = F)
+price_surface$price <- predict.lm(model, newdata = price_surface)
+price_surface <- acast(price_surface, 
+                      sqft ~ price_per_sqft, value.var = "price")
+
+advanced_plot %>% add_trace(z = price_surface,
+                                        x = axis_x,
+                                        y = axis_y,
+                                        type = "surface")
+# ------------------------------------------------------------------------
+
 
 
 # Question 2: Is this A or B
