@@ -17,7 +17,7 @@
 ## unlar
 
 ## Frage vorab: Wer hat keine Ahnung von Statistik 
-## (Regression, Bestimmtheitsmass etc.)
+## (Histogramm, Regression, Bestimmtheitsmass (R^2))
 
 
 # Packages referenzieren
