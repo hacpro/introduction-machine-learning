@@ -468,7 +468,10 @@ table(iris_set$cluster,
 
 # Frage: Ist das seltsam
 #   Different dimensional Visualizations (why not the Kernel Trick, 3.3. Romeo)
+#   http://www.eric-kim.net/eric-kim-net/posts/1/kernel_trick.html
 #   Anomaly detection algorithm
+
+
 
 # Frage: Was soll ich als nächstes tun
 #   Recommenders
