@@ -475,7 +475,11 @@ table(iris_set$cluster,
 
 # Frage: Was soll ich als nächstes tun
 #   Recommenders
+#    
 #   Reinforcement Learning
+#   https://cran.r-project.org/web/packages/ReinforcementLearning/vignettes/ReinforcementLearning.html
+#   http://www.is.uni-freiburg.de/ressourcen/business-analytics/13_reinforcementlearning.pdf
+#   
 
 # Weiterführende Themen
 # Ensemble Learning: Randon Forest
