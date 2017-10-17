@@ -464,19 +464,43 @@ table(iris_set$cluster,
 # 2. k-means ist ein bekannter Clustering-Algorithmus
 
 
-# Offen
-
 # Frage: Ist das seltsam
-#   Different dimensional Visualizations (why not the Kernel Trick, 3.3. Romeo)
-#   http://www.eric-kim.net/eric-kim-net/posts/1/kernel_trick.html
-#   Anomaly detection algorithm
+# Methode: Anonaly detection algorithm
 
+# Library fuer Paketinstallation ab Github installieren
+# install.packages("devtools")
+ 
+# AnomalyDetection Paket von Twitter installieren und laden
+# devtools::install_github("twitter/AnomalyDetection")
+library(AnomalyDetection)
+
+# Schauen wir uns Beispiel-Twitterdaten an
+raw_data %>% head()
+
+# Daten laden
+data(raw_data)
+
+## (Trend und Saisonalitaet werden bei diesem Algorithmus beruecksichtigt)
+## TODO:
+## Unterschied zwischen lokalen und globalen Anomalien herausfinden
+## (https://blog.twitter.com/engineering/en_us/a/2015/introducing-practical-and-robust-anomaly-detection-in-a-time-series.html)
+
+# Anomaly Detection ausfuehren mit Twitter package
+result = AnomalyDetectionTs(raw_data, 
+                            max_anoms=0.02, 
+                            direction='both', 
+                            plot=TRUE)
+
+# Plot anzeigen
+result$plot
 
 
 # Frage: Was soll ich als nächstes tun
-#   Recommenders
-#    
-#   Reinforcement Learning
+# Methode: Recommenders, Reinforcment Learning
+
+
+
+
 #   https://cran.r-project.org/web/packages/ReinforcementLearning/vignettes/ReinforcementLearning.html
 #   http://www.is.uni-freiburg.de/ressourcen/business-analytics/13_reinforcementlearning.pdf
 #   
