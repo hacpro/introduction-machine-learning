@@ -37,8 +37,8 @@ library(datasets)
 ## Was kann Visual Studio alles?
 ## Korrelationsmatrix einsetzen irgendwo, resp. entweder bei fourfoldplot oder
 ##    bei erster Modellevaluation
-## Precision and Recall -> Folien
 ## Df's loeschen
+## Reinforcement Learning erklaeren koennen (Erziehung)
 
 # Arbeitsverzeichnis setzen
 setwd("c:/source/introduction-machine-learning")
@@ -496,14 +496,52 @@ result$plot
 
 
 # Frage: Was soll ich als nächstes tun
-# Methode: Recommenders, Reinforcment Learning
+# Methode: Reinforcment Learning
+
+# Paket fuer modellfreies Reinforcement Learning installieren
+devtools::install_github("nproellochs/ReinforcementLearning")
+library(ReinforcementLearning)
+
+# Beispiel Daten laden (100k zufaellig ausgewaelte Tic-Tac-Toe Spiele)
+data(tictactoe)
+
+# Jede Zeile zeigt eine Aktion und die Belohnung auf diese Aktion
+# (0 = Spiel laeuft weiter, -1 = X verliert, 1 = X gewinnt)
+head(tictactoe, 50)
+
+# Parameter fuer Reinforcement Learning definieren
+control <- list(alpha = 0.1, gamma = 0.5, epsilon = 0.1)
+
+# Reinforcement learning ausfuehren
+# Achtung, das kann eine Weile dauern
+model <- ReinforcementLearning(tictactoe, s = "State", a = "Action", r = "Reward", 
+                               s_new = "NextState", control = control)
+
+# Modell ausgeben
+print(model)
+
+# Policy ausgeben (bester Zug fuer entsprechendes State)
+policy(model)
+
+# Beispiel fuer gelerntes Handel
+
+# State
+#     B . .
+#     B X .
+#     . . X
+
+# Algorithmus nach Zug fragen
+policy(model)["B..BX...X"]
+
+##  Vorgeschlagener Zug "c7" macht Sinn
+
+# Alternativ koennte das Lernen auch ueber eine Funktion 
+# gemacht werden, welche die Uebergaenge der Zustaende modelliert 
+# (see environment function)
 
 
 
 
-#   https://cran.r-project.org/web/packages/ReinforcementLearning/vignettes/ReinforcementLearning.html
-#   http://www.is.uni-freiburg.de/ressourcen/business-analytics/13_reinforcementlearning.pdf
-#   
 
 # Weiterführende Themen
 # Ensemble Learning: Randon Forest
