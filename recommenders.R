@@ -45,7 +45,7 @@ recommendations <- predict(recommender_model,
                  ratingmat[1], n=10) 
 
 # Recommenderelab objekt in lesbare Liste verwandeln
-recommendations_list <- unlist(as(recomendations, "list"))
+recommendations_list <- unlist(as(recommendations, "list"))
 
 # Funktion zum bestimmen von Titeln von Movie-Id
 getMovieTitle <- function(id)
