@@ -32,13 +32,6 @@ library(rpart)
 library(rpart.plot)
 library(datasets)
 
-## TODO:
-## Was ist elevation im Datensatz?
-## Was kann Visual Studio alles?
-## Korrelationsmatrix einsetzen irgendwo, resp. entweder bei fourfoldplot oder
-##    bei erster Modellevaluation
-## Df's loeschen
-## Reinforcement Learning erklaeren koennen (Erziehung)
 
 # Arbeitsverzeichnis setzen
 setwd("c:/source/introduction-machine-learning")
@@ -85,7 +78,7 @@ kurtosis(buildings$price)
 ## Das ganze koennen wir natuerlich auch etwas schoener machen
 ## aber das werden wir spaeter sehen
 
-
+# --------------------------------------------------------------------------
 # Frage 1: Wieviel kostet ein Gebaeude?
 
 ## Gesetzt wir haetten keinen Preis, wie koennten wir diesen annähnern. 
@@ -153,11 +146,9 @@ advanced_plot %>% add_trace(z = price_surface,
                                         x = axis_x,
                                         y = axis_y,
                                         type = "surface")
+
 # ------------------------------------------------------------------------
-
-
-
-# Frage: Ist ein Haus aus San Francisco oder New York
+# Frage: Ist ein Haus aus San Francisco oder New York?
 # ------------------------------------------------------------------------
 
 ## Kategorisieren (NYC oder SF) in Machine Learning Jargon ist
@@ -352,10 +343,9 @@ confusionMatrix(in_sf_tree,
 ## Sensitivity : 0.8387         
 ## Specificity : 0.8837
 
-## Falls Zeit vorhanden
-
-# ------------------------------------------------------------------------
-# Beschneidung des Baumes mit cross validation error
+# --------------------------------------------------------------------------
+# Vertiefung - Beschneidung des Baumes mit cross validation error
+# --------------------------------------------------------------------------
 
 # Tiefe des Baumes bestimmen
 dtree$cptable
@@ -369,7 +359,7 @@ plotcp(dtree) # Baum zeigt Komplexitaet (cp) vs cross-validated error
 ## Haengt mit standard error zusammen (se < min(x-val e))
 
 dtree_pruned <- prune(dtree, cp = .02679)
-# ------------------------------------------------------------------------
+# --------------------------------------------------------------------------
 
 # Wrap up
 # 1. Machine Learning identifiziert Grenzen und Muster 
@@ -463,9 +453,10 @@ table(iris_set$cluster,
 # 1. Unsupervised Learning muss ohne Training auskommen
 # 2. k-means ist ein bekannter Clustering-Algorithmus
 
-
-# Frage: Ist das seltsam
+# --------------------------------------------------------------------------
+# Frage: Ist das seltsam?
 # Methode: Anonaly detection algorithm
+# --------------------------------------------------------------------------
 
 # Library fuer Paketinstallation ab Github installieren
 # install.packages("devtools")
@@ -494,9 +485,10 @@ result = AnomalyDetectionTs(raw_data,
 # Plot anzeigen
 result$plot
 
-
+# --------------------------------------------------------------------------
 # Frage: Was soll ich als nächstes tun
 # Methode: Reinforcment Learning
+# --------------------------------------------------------------------------
 
 # Paket fuer modellfreies Reinforcement Learning installieren
 devtools::install_github("nproellochs/ReinforcementLearning")
@@ -514,8 +506,11 @@ control <- list(alpha = 0.1, gamma = 0.5, epsilon = 0.1)
 
 # Reinforcement learning ausfuehren
 # Achtung, das kann eine Weile dauern
-model <- ReinforcementLearning(tictactoe, s = "State", a = "Action", r = "Reward", 
-                               s_new = "NextState", control = control)
+model <- ReinforcementLearning(tictactoe, s = "State", 
+                               a = "Action", 
+                              r = "Reward", 
+                               s_new = "NextState", 
+                              control = control)
 
 # Modell ausgeben
 print(model)
@@ -539,7 +534,7 @@ policy(model)["B..BX...X"]
 # gemacht werden, welche die Uebergaenge der Zustaende modelliert 
 # (see environment function)
 
-
+# --------------------------------------------------------------------------
 
 
 
