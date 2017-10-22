@@ -7,9 +7,11 @@
 # Split datasets
 # http://h2o-release.s3.amazonaws.com/h2o/master/3552/docs-website/h2o-docs/datamunge/splitdatasets.html
 
+# https://kuanhoong.wordpress.com/2016/02/01/r-and-deep-learning-cnn-for-handwritten-digits-recognition/
+
 # as factors!
 # convert digit labels to factor for classification
-training[,1]<-as.factor(training[,1])
+#training[,1]<-as.factor(training[,1])
 
 
 install.packages("RCurl")
@@ -24,7 +26,7 @@ library(h2o)
 library(ggplot2)
 
 # starts a local h2o server, alternativ waere amazon ec2 oder microsoft azure
-h2o.init(nthreads=-1, max_mem_size="1G")
+h2o.init(nthreads=-1, max_mem_size="4G")
 
 # Pfad
 mnist = read.csv( "data/mnist.csv" )
@@ -37,21 +39,16 @@ for(i in 1:100){
 }
 
 
+# faktoren
+mnist[,1]<-as.factor(mnist[,1])
+
 train_rows <- sample(nrow(mnist), .7 * (nrow(mnist)))
 train <- mnist[train_rows,]
 test <- mnist[-train_rows,]
 
-# write kann ich mir sparen mit as.h2o(train)
-write.csv(train, "data/train.csv", 
-          quot = FALSE,
-          eol = "\r\n", row.names = FALSE)
-write.csv(train, "data/test.csv", 
-          quot = FALSE,
-          eol = "\r\n", row.names = FALSE)
 
-train_h2o <- h2o.importFile(
-                            path = normalizePath("data/train.csv"),
-                            sep=",")
+train_h2o <- as.h2o(train)
+test_h2o <- as.h2o(test)
 
 
 # auto encoder, kind of automatic feature engineering
@@ -79,10 +76,6 @@ qplot(DF.L3.C1,
 
 
 # Prediction for test set
-test_h2o <- h2o.importFile(
-  path = normalizePath("data/test.csv"),
-  sep=",")
-
 pred <- h2o.predict(nn_model, 
                           newdata = test_h2o[,-1])
 

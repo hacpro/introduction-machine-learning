@@ -51,7 +51,8 @@ summary(buildings$price)
 ## Mean und Median erklaeren
 
 # Histogramm der Preise ausgeben
-hist(buildings$price, breaks = 200, prob = T)
+hist(buildings$price, breaks = 200, 
+     prob = T)
 
 # Mittelwert und Median darstellen
 abline(v = mean(buildings$price),
@@ -61,7 +62,6 @@ abline(v = median(buildings$price),
      col = "blue",
      lwd = 1, 
      lty = 2)
-
 
 # Dichteverteilung einzeichnen
 lines(density(buildings$price),  
@@ -112,22 +112,28 @@ ggplot(buildings, aes(sqft, price, col = buildings$in_sf)) +
 # Neues Modell mit mehreren Variablen
 ## Vorschlaege? Wenn nicht bereits gekommen..
 
-summary(lm(price ~ sqft + price_per_sqft, buildings))
-## Adjusted R-squared:  0.873
+summary(lm(price ~ sqft + bath, buildings))
+## Adjusted R-squared:  0.6658 
 ## Ziemlich gut, aber wie visualisien wir das?
 
 # Erster Ansatz: Einfacher 3D-Plot
-plot <- scatterplot3d(buildings$sqft, buildings$price_per_sqft, buildings$price)
+plot <- scatterplot3d(buildings$sqft, buildings$bath, buildings$price)
 model  <- lm(price ~ sqft + price_per_sqft, buildings)
 plot$plane3d(model)
 
+##
+
+# 
+# predict(model, )
+
 # Etwas ausgefeiltere Variante
-advanced_plot <- plot_ly(buildings, x = ~sqft, y = ~price_per_sqft, 
+advanced_plot <- plot_ly(buildings, x = ~sqft, y = ~bath, 
         z = ~price,
         color = ~price,
         type = "scatter3d", 
         mode = "markers")
 
+advanced_plot
 
 # ------------------------------------------------------------------------
 # Und noch die Regressionsebene fuer die welche es wissen wollen
@@ -168,7 +174,7 @@ ggplot(df, aes(in_sf, elevation, colour = in_sf)) +
 ## Haeuser ueber 73 Meter sollten Klassifiziert werden als in_sf
 
 # Datensatz mit gewonnener Erkenntnis klassifizieren
-in_sf <- as.integer(as.logical(buildings$elevation > 73))
+in_sf <- as.integer(as.logical(buildings$elevation > 75))
 
 
 # Richtige Kategorisierungen bestimmen
@@ -214,11 +220,18 @@ ggplot(df, aes(price_per_sqft, elevation, colour = in_sf)) +
   annotate("rect", xmin=2250,xmax=Inf, ymin=0, ymax=73, alpha=0.2, fill="#F8766D") 
 
 
-## Identifying boundaries in data using math is the essence of statistical learning.
+
+# !! sein lassen
+# statistische Massnahmen -> erkenntnisse
+## Identifying boundaries in data using math is the essence 
+# of statistical learning.
 
 
 ## Nun haben wir die sicheren, aber was mit denen im nicht markierten Bereich?
 ## Wir brauchen mehr Informationen
+
+
+# todo: zusammenlegen
 
 # Korrelationsmatrix darstellen
 df2 <- buildings
@@ -302,7 +315,8 @@ fourfoldplot(table(as.integer(as.logical(buildings$elevation > 28)),
 set.seed(1234)
 
 # Klassischen Descision Tree erstellen
-dtree <- rpart(in_sf ~ ., buildings, method = "class")
+dtree <- rpart(in_sf ~ ., buildings, 
+               method = "class")
 
 # Anhand von Modell Klassifizierung machen
 in_sf_tree <- predict(dtree, buildings, type = "class")
@@ -374,6 +388,9 @@ dtree_pruned <- prune(dtree, cp = .02679)
 ## Die wichtigsten Konzepte kenn wir nun, wir koenne jetzt also
 ## ein bisschen schneller voran gehn
 
+
+# Frage: wie ist das organisiert?
+
 ## Nehmen wir einen Datensatz bei dem wir
 # -https://www.r-bloggers.com/k-means-clustering-in-r/
 
@@ -396,6 +413,8 @@ ggpairs(data = iris_set, title = "Korrelationsmatrix")
 clusters <- kmeans(iris_set, 
                    2, # Anzahl erwarteter Cluster 
                    nstart = 20)
+
+#todo; 3 clusters entfernen
 
 # Und schauen wir uns diese Clusters einmal an
 clusters
@@ -454,8 +473,8 @@ table(iris_set$cluster,
 # 2. k-means ist ein bekannter Clustering-Algorithmus
 
 # --------------------------------------------------------------------------
-# Frage: Ist das seltsam?
-# Methode: Anonaly detection algorithm
+# Frage: Ist das sonderbar?
+# Methode: Anomaly detection algorithm
 # --------------------------------------------------------------------------
 
 # Library fuer Paketinstallation ab Github installieren
