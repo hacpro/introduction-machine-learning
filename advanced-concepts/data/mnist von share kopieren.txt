@@ -1,0 +1,2 @@
+Dataset ist hier zu finden:
+\\p-win-file1\TRANSFER\ch\mnist.csv
