@@ -62,10 +62,6 @@ train_h2o <- as.h2o(train)
 test_h2o <- as.h2o(test)
 
 # Wir trainieren nun ein NN mit 4 'hidden' Layern a 200 Neuronen
-# ACHTUNG: Das Trainieren dieses NN kann je nach Rechner
-# einige Stunden in Anspruch nehmen
-# (Fuer schneller - weniger praezisere - Ergebnisse, kann
-# die Anzahl der Layers, Neuronen oder Iterationen limitiert werden)
 nn_model = h2o.deeplearning(
   x = 2:785,                          # die Predictor-Variablen
   y = 1,                              # die Response-Variable (label)
@@ -111,15 +107,20 @@ h2o.performance(nn_model, test_h2o)
 
 
 
-# 2. Einen Auto-Encoder trainieren (unsupervised learning)
+# 2. Einen Autoencoder trainieren (unsupervised learning)
 # (siehe https://de.wikipedia.org/wiki/Autoencoder)
 # -------------------------------------------------------------------
 
 # Ein Autoencoder wird dazu genutzt um eine komprimierte Repraesentation
-# der Daten zu erlernen. Er extrahiert also relevante Merkmale. 
+# der Daten zu erlernen. Er extrahiert also relevante Merkmale zur Weiter-
+# verarbeitung oder zur Optimierung.
 
-# Wir trainieren nun einen Auto-Encoder (Option autoencoder)
-# und reduzieren die Anzahl Neuronen im mittleren Layer auf zwei
+# Wir trainieren nun also einen Autoencoder (Option autoencoder)
+# und reduzieren den mittleren Layer auf zwei Neuronen.
+# ACHTUNG: Das Trainieren dieses NN kann je nach Rechner
+# einige Zeit in Anspruch nehmen (Fuer schnellere - weniger 
+# praezisere - Ergebnisse, kann die Anzahl der Layers, Neuronen 
+# oder Iterationen limitiert werden)
 nn_model = h2o.deeplearning(
   x = 2:785,
   training_frame = train_h2o,
@@ -135,7 +136,7 @@ layer3_features = h2o.deepfeatures(nn_model,
                                    train_h2o, 
                                    layer=3)
 
-# Diesen mittleren Layer der nun aus zwei Dimensionen besteht, koennen
+# Diesen mittleren Layer - bestehend aus zwei Dimensionen - koennen
 # wir nun visualieren. Zu diesem Zweck faerben wir die einzelnen Zahlen
 # in einer anderen Farbe ein
 plotdata = as.data.frame(layer3_features)
@@ -145,17 +146,14 @@ qplot(DF.L3.C1,
       color = label, 
       main = "Neuronales Netz (400 - 200 - 2 - 200 - 400)")
 
-# (Durch die Reduktion auf zwei Dimensionen koennen wir nun die Pixels
-# visualisieren, welche die Komprimierung (Encoding) 'ueberlebt' haben und so
-# fuer den Algorithmus von hoeherer Wichtigkeit sind. Diese sind fuer jede
-# Zahl natuerlich anders und wir koennen eine Separierung erkennen. Aus
-# diesem reduzierten Repraesentation koennte das neuronale Netz nun wieder
-# einen Output generieren (je nach Netz-Topologie mit mehr oder weniger Verlust).
+# Es ist nun eine sichtbare Konzentration der einzelnen Ziffern erkennbar -
+# die verschiedenen Ziffern haben eine andere, reduzierte Repraesentation.
+# Aus dieser Repraesentation koennte das neuronale Netz nun wieder
+# einen Output generieren (je nach Topologie mit mehr oder weniger Verlust).
 
 # Plot-Layout wieder zurueck setzen
 par(mfrow=c(1,1))
 
 # Und wir beenden unser virtuelles H2O cluster wieder
 h2o.shutdown(prompt = FALSE)
-
 
