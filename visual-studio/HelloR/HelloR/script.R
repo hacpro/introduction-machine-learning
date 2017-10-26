@@ -1,7 +1,7 @@
 
 # Benoetigte Packete installieren
-install.packages("RODBC")
-install.packages("data.table") # fuer die SQL-Freunde unter uns
+#install.packages("RODBC")
+#install.packages("data.table") # fuer die SQL-Freunde unter uns
 
 # Pakete inkludieren
 library(RODBC)
@@ -29,14 +29,12 @@ mietzinse <- sqlQuery(connection, "select mz.GueltigAb ,mz.BetragNetto, abr.Kant
 # In data.table verwandeln, damit wir im bekannten Terrain sind
 mietzinse_table <- na.omit(data.table(mietzinse))
 
-# Summry ausgeben
-count(mietzinse_table)
+# Summary ausgeben
+nrow(mietzinse_table)
 summary(mietzinse_table)
-
 
 # Jahr-Spalte einfuehren
 mietzinse_table$Jahr <- format(mietzinse_table$GueltigAb, "%Y")
-
 
 ## DT[i, j, by]
 ##   R:      i                 j        by
