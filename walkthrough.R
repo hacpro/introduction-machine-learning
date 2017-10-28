@@ -11,15 +11,6 @@
 # install.packages("rpart", dependencies = T)
 # install.packages("rpart.plot", dependencies = T)
 
-## Es reicht wenn ihr konzeptionell wisst, was passiert.
-## Der Code koennt ihr dann alle runterladen und ausfuehren/analysieren
-## Deshalb: Ich gebe so viel Gas wie möglich und ihr bremst wo voellig 
-## unlar
-
-## Frage vorab: Wer hat keine Ahnung von Statistik 
-## (Histogramm, Regression, Bestimmtheitsmass (R^2))
-
-
 # Packages referenzieren
 library(ggplot2)
 library(GGally)
