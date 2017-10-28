@@ -31,15 +31,12 @@ setwd("c:/source/introduction-machine-learning")
 buildings <- read.csv2("buildings.csv", sep = ",")
 
 # Eine Uebersicht der Daten  anzeigen
-head(buildings)
-summary(buildings)
+View(buildings)
 
-## Kurz erklaren was fuer Daten wir hier vor uns haben
+#
 
 # Wir wollen uns als ersten die Preise anschauen
 summary(buildings$price)
-
-## Mean und Median erklaeren
 
 # Histogramm der Preise ausgeben
 hist(buildings$price, breaks = 200, 
@@ -47,84 +44,63 @@ hist(buildings$price, breaks = 200,
 
 # Mittelwert und Median darstellen
 abline(v = mean(buildings$price),
-       col = "blue",
+       col = "darkblue",
        lwd = 1)
 abline(v = median(buildings$price),
-     col = "blue",
+     col = "darkblue",
      lwd = 1, 
      lty = 2)
 
-# Dichteverteilung einzeichnen
-lines(density(buildings$price),  
- lwd = 2 # thickness of line
- )
+#
 
-## Die kleinen Statistiker haben es bereits herausgefunden
-## wir haben eine positive Schiefe / rechtsschiefe Verteilung
+# Kerndichteschätzung einzeichnen
+lines(density(buildings$price),  
+ lwd = 1, # thickness of line
+ col = "red"
+ )
 
 # Kurtosis und Schiefe ausgeben
 skewness(buildings$price)
 kurtosis(buildings$price)
 
-## Das ganze koennen wir natuerlich auch etwas schoener machen
-## aber das werden wir spaeter sehen
+#
 
 # --------------------------------------------------------------------------
 # Frage 1: Wieviel kostet ein Gebaeude?
-
-## Gesetzt wir haetten keinen Preis, wie koennten wir diesen annähnern. 
-## Entweder neue Daten oder fehlender Preis
+# (Einschaetzung von neuem Haus ohne Preisinformation)
 # --------------------------------------------------------------------------
 
-## Hat jemand eine Idee? 
-## Welche Eigenschaften (Features) in unserem Datensatz könnten
-## dafuer relevant sein?
+# Lineares Regressionsmodell erstellen
+lm_price <- lm(price ~ sqft, buildings)
 
-## Wenn jemand eine Idee hat nehmen wir diese Eigenschaft und machen eine Regression
-## (e.g. price or sqft)
-
-# Regression machen
-summary(lm(price ~ sqft, buildings))
-## Adjusted R-squared: 0.5107
-
-## Kurz Lineare Regression erklaeren (p-value, R-Squared)
-## Klammerbemkerung: Andere Formen von Regression wie Logistische Regression
-
-# Gleiches Regressionsmodell visualisieren
-ggplot(buildings, aes(sqft, price, col = buildings$in_sf)) +
+# Modell in Streudiagramm visualisieren
+ggplot(buildings, aes(sqft, price)) +
   geom_point() +
   geom_smooth(method = "lm")
 
-## Erklaeren:
-## Je naeher die Punkte an der Linie, desto besser unser Modell
-## Nicht schlecht, aber das muss noch besser gehen
+# Kennzahlen ausgeben
+summary(lm_price)
+
+#
+
+# Regressionsmodell verfeinern
+lm_price2 <- lm(price ~ sqft + bath, buildings)
+summary(lm_price2)
 
 
-# Neues Modell mit mehreren Variablen
-## Vorschlaege? Wenn nicht bereits gekommen..
-
-summary(lm(price ~ sqft + bath, buildings))
-## Adjusted R-squared:  0.6658 
-## Ziemlich gut, aber wie visualisien wir das?
-
-# Erster Ansatz: Einfacher 3D-Plot
-plot <- scatterplot3d(buildings$sqft, buildings$bath, buildings$price)
-model  <- lm(price ~ sqft + price_per_sqft, buildings)
-plot$plane3d(model)
-
-##
-
-# 
-# predict(model, )
-
-# Etwas ausgefeiltere Variante
-advanced_plot <- plot_ly(buildings, x = ~sqft, y = ~bath, 
+# 3D-Plot anzeigen
+plot_ly(buildings, x = ~sqft, y = ~as.integer(bath), 
         z = ~price,
         color = ~price,
         type = "scatter3d", 
         mode = "markers")
 
-advanced_plot
+#
+
+
+# Schaetzung machen fuer Gebaeude mit 2000 sqft und 2 Baeder
+predict(lm_price2, data.frame(sqft=2000, bath=as.factor(2)))
+
 
 # ------------------------------------------------------------------------
 # Und noch die Regressionsebene fuer die welche es wissen wollen
@@ -143,6 +119,7 @@ advanced_plot %>% add_trace(z = price_surface,
                                         x = axis_x,
                                         y = axis_y,
                                         type = "surface")
+
 
 # ------------------------------------------------------------------------
 # Frage: Ist ein Haus aus San Francisco oder New York?
