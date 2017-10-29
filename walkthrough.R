@@ -103,7 +103,9 @@ predict(lm_price2, data.frame(sqft=2000, bath=as.factor(2)))
 
 
 # ------------------------------------------------------------------------
-# Und noch die Regressionsebene fuer die welche es wissen wollen
+# Vertiefung - Darstellung Regressionsebene
+# ------------------------------------------------------------------------
+
 graph_reso <- 10
 axis_x <- seq(min(buildings$sqft), max(buildings$sqft), 
               by = graph_reso)
@@ -119,18 +121,13 @@ advanced_plot %>% add_trace(z = price_surface,
                                         x = axis_x,
                                         y = axis_y,
                                         type = "surface")
+# ------------------------------------------------------------------------
 
 
 # ------------------------------------------------------------------------
 # Frage: Ist ein Haus aus San Francisco oder New York?
 # ------------------------------------------------------------------------
 
-## Kategorisieren (NYC oder SF) in Machine Learning Jargon ist
-## Classification
-
-## Zuerst Intuition
-## Hat jemand eine gute Idee? Was sagt die Intuition (SF ist huegelig)
-## elevation: Schauen wir uns die Hoehe in den verschiedenen Staedten an
 
 # Anzeigen von Erhoehung, gruppiert nach Stadt
 df <- buildings
@@ -138,11 +135,14 @@ df$in_sf <- as.factor(buildings[, 1])
 ggplot(df, aes(in_sf, elevation, colour = in_sf)) +
   geom_point(alpha = .2, size = 5)
 
-## Wer hat also einen Vorschlag?
-## Haeuser ueber 73 Meter sollten Klassifiziert werden als in_sf
+# 
+
 
 # Datensatz mit gewonnener Erkenntnis klassifizieren
-in_sf <- as.integer(as.logical(buildings$elevation > 75))
+in_sf <- as.integer(as.logical(buildings$elevation > 73))
+
+
+# 
 
 
 # Richtige Kategorisierungen bestimmen
@@ -153,31 +153,26 @@ correct_classifications <- sum(classifications == T)
 # Prozent richtige bestimmen
 correct_classifications / all_classifications
 
-## [1] 0.6443089 -> 65% Korrekt -> nicht schlecht
+# 
 
-## Ausflug nach Precision and Recall
 
 # Konfusionsmatrix erstellen
-confusionMatrix(in_sf, 
-                buildings$in_sf,
+confusionMatrix(buildings$in_sf,
+                in_sf,
                 dnn = c("Prediction", "Reference"))
 
-## Matrix erklaren und unseren Wert und Sensitivity und Specifity referenzieren
 
 
-## Wir wollen das ganze noch etwas verfeinern. Vorschlaege?
-## Preis pro Quadratmeter?
+# -> Kennzahlen
 
-## Schauen wir uns unsere Daten anhand unserem neuen Wissen an
-## und visualisieren m2-Preis und Hoehe
+
 
 # m2-Preis und Hohe darstellen nach Stadt
 ggplot(df, aes(price_per_sqft, elevation, colour = in_sf)) +
   geom_point(alpha = .5) 
 
-## Im Scatterplot koennen wir erkennen, dass man bei den tieferen
-## Haeuser eine weitere Praezisierung machen kann (ca. bei 2300$ pro sqft)
-## Dimensions in a data set are called features, predictors, or variables.
+
+# 
 
 
 
@@ -188,96 +183,39 @@ ggplot(df, aes(price_per_sqft, elevation, colour = in_sf)) +
   annotate("rect", xmin=2250,xmax=Inf, ymin=0, ymax=73, alpha=0.2, fill="#F8766D") 
 
 
+#
 
-# !! sein lassen
-# statistische Massnahmen -> erkenntnisse
-## Identifying boundaries in data using math is the essence 
-# of statistical learning.
-
-
-## Nun haben wir die sicheren, aber was mit denen im nicht markierten Bereich?
-## Wir brauchen mehr Informationen
-
-
-# todo: zusammenlegen
 
 # Korrelationsmatrix darstellen
-df2 <- buildings
-df2$in_sf <- as.factor(buildings[, 1])
-ggpairs(data = df2, columns = c(2,3, 4, 5, 6, 7, 8), title = "Korrelationsmatrix",
-        mapping = ggplot2::aes(colour = in_sf),
-        cardinality_threshold = 16)
-
-## Unsere Daten haben 7 Dimensionen
-## Kardinale Daten anders angezeigt
-
-## Wir entfernen kategoriale Variablen mit zu vielen Varianten
+# (Wir entfernen kategoriale Variablen mit zu vielen Varianten)
 df2 <- buildings
 df2$in_sf <- as.factor(buildings[, 1])
 ggpairs(data = df2, columns = c(4, 5, 6, 7, 8), title = "Korrelationsmatrix",
         mapping = ggplot2::aes(colour = in_sf))
 
 
-## Es sind definitiv Muster erkennbar, aber sie sind nichth umbedingt
-## direkt ersichtlich, resp. die Trennungen koennen nicht klar gezogen werden
+#
 
 
-## Jetzt starten wir mit Machine Learning
-## Muster in Daten zu finden ist eine Aufgabe für ML
-## ML-Algorithmen benutzen statistisches Lernen um Grenzen
-## zu bestimmen
+# Entscheidungsbaum (Decision Tree)
 
-
-# Starten wir mit einem Entscheidungsbaum (Decision Tree)
-
-# Schauen wir uns noch einmal unsere erste Regel (> 73m) an
-df <- buildings
-df$in_sf <- as.factor(buildings[, 1])
-ggplot(df, aes(in_sf, elevation, colour = in_sf)) +
-  geom_point(alpha = .2, size = 5)
-
-# Als Histogramm, damit die Dichten klarer ersichtlich sind
-df %>% 
-  ggplot(aes(elevation, fill=in_sf)) +
-  geom_histogram(aes(y = ..density..), position = "identity",
-                 alpha = .4)
-
-## Obwohl ein Gebäude in SF auf 73m liegt, die meisten liegen
-## einiges darunter
-
-## Ein Entscheidungsbaum verwendet Entscheidungen um Muster
-## in Daten zu erkennen, lets have a look
-
-## Unser erster Versuch mit einer Entscheidung erbrachte 63%
-## Wir hatten viele false negatives
-
-# Confusion Matrix darstellen (viele false negatives)
-fourfoldplot(table(in_sf, buildings$in_sf), 
-             color = c("#CC6666", "#99CC99"),
-             conf.level = 0, margin = 1, 
-             main = "Confusion Matrix")
-
-# Verschieben wir die Hoehengrenze (e.g. 50m), dann gibt es mehr (false positives)
-fourfoldplot(table(as.integer(as.logical(buildings$elevation > 50)), 
-                   buildings$in_sf), 
-             color = c("#CC6666", "#99CC99"),
-             conf.level = 0, margin = 1, 
-             main = "Confusion Matrix")
-
-## Es gibt verschiedene mathematische Verfahren den besten
-## Kompromiss herauszufinden (gini index, cross entropy)
-
-# Der beste Wert liegt bei ungefaehr 28m
-fourfoldplot(table(as.integer(as.logical(buildings$elevation > 28)), 
-                   buildings$in_sf), 
+# Schauen wir uns noch einmal unsere erste Regel (> 73ft) an
+fourfoldplot(table(Predicted=as.integer(buildings$elevation > 73), 
+                    Actual=buildings$in_sf), 
              color = c("#CC6666", "#99CC99"),
              conf.level = 0, margin = 1, 
              main = "Confusion Matrix")
 
 
-## Wir sehen, auch der beste Wert ist ein Kompromiss
-## Es braucht also weitere Forks (Unterteilungen des Teile)
-## Gluecklicherweise haben wir R
+# Verschieben wir die Hoehengrenze nach unten
+fourfoldplot(table(Predicted=as.integer(buildings$elevation > 40), 
+                   Actual=buildings$in_sf), 
+             color = c("#CC6666", "#99CC99"),
+             conf.level = 0, margin = 1, 
+             main = "Confusion Matrix")
+
+#
+
 
 # Reproduzierbarkeit sicherstellen
 set.seed(1234)
@@ -289,23 +227,20 @@ dtree <- rpart(in_sf ~ ., buildings,
 # Anhand von Modell Klassifizierung machen
 in_sf_tree <- predict(dtree, buildings, type = "class")
 
+
+# Schauen wir uns diesen Baum an (Vorteil von Descision Trees)
+rpart.plot(dtree)
+
 # Unser Resultat begutachten
 confusionMatrix(in_sf_tree, 
                 buildings$in_sf,
                 dnn = c("Prediction", "Reference"))
 
-# Accuracy : 0.9146
-# Sensitivity : 0.9464
-# Specificity : 0.8881
 
-# Schauen wir uns diesen Baum an (Vorteil von Descision Trees)
-rpart.plot(dtree)
+#
 
-## Das ist verdammt gut, was denkst ihr?
-## Overfitting!
-## Wie begegnen wir Overfitting? Yes, cross-validation!
 
-# Wir teilen unsere Daten in training und test set (70%/30%)
+# Wir teilen unsere Daten in Training und Testset auf (70%/30%)
 train_rows <- sample(nrow(buildings), .7*nrow(buildings))
 train_set <- buildings[train_rows,]
 validation_set <- buildings[-train_rows,]
@@ -321,12 +256,11 @@ confusionMatrix(in_sf_tree,
                 validation_set$in_sf,
                 dnn = c("Prediction", "Reference"))
 
-## Accuracy : 0.8649
-## Sensitivity : 0.8387         
-## Specificity : 0.8837
+
+# 
 
 # --------------------------------------------------------------------------
-# Vertiefung - Beschneidung des Baumes mit cross validation error
+# Vertiefung - Beschneidung des Baumes mit 'cross validation error'
 # --------------------------------------------------------------------------
 
 # Tiefe des Baumes bestimmen
@@ -343,66 +277,46 @@ plotcp(dtree) # Baum zeigt Komplexitaet (cp) vs cross-validated error
 dtree_pruned <- prune(dtree, cp = .02679)
 # --------------------------------------------------------------------------
 
-# Wrap up
-# 1. Machine Learning identifiziert Grenzen und Muster 
-#   mit statistischem Lernen
-# 2. Wir kennen ersten ML-Methode: Descision Trees
-# 3. Wissen was Overfitting ist und wie man sie umgeht
-# 4. Kennen Cross-Validation
 
 
-## Welcher Art von ML hatten wir also hier?
-## Schauen wir uns als naechstes unsupervised learning an
-## Die wichtigsten Konzepte kenn wir nun, wir koenne jetzt also
-## ein bisschen schneller voran gehn
-
-
+# ------------------------------------------------------------------------
 # Frage: wie ist das organisiert?
+# Methode: Clustering
+# ------------------------------------------------------------------------
 
-## Nehmen wir einen Datensatz bei dem wir
-# -https://www.r-bloggers.com/k-means-clustering-in-r/
-
-## Schauen wir uns einen unverbindlichen Datensatz an: Blumen
-
-# Und jetzt etwas unsupervised learning
 
 # Wir schauen uns den Iris-Datensatz an. 
 iris_set <- iris[, -5]
 head(iris_set)
 
-## Sepal = Kelch, Petal = Blütenblatt
 
-# Schauen wir uns auch hier die Daten an
+#
+
+
+# Korrelationsmatrix anzeigen
 ggpairs(data = iris_set, title = "Korrelationsmatrix")
 
-## Sieht nach zwei Gruppen aus oder? (zwei Taeler, zwei Gruppen)
+
+#
+
+
 
 # Wir lassen R einmal zwei Clusters erstellen
 clusters <- kmeans(iris_set, 
                    2, # Anzahl erwarteter Cluster 
                    nstart = 20)
-
-#todo; 3 clusters entfernen
-
 # Und schauen wir uns diese Clusters einmal an
 clusters
 
-## Within cluster sum of squares by cluster:
-##   [1]  28.55208 123.79588
-## (between_SS / total_SS =  77.6 %)
-## Kurz: Rund 78 der Variation im Dataset wird
-## durch das Clustering erklaert
-
 # Visualisieren wir diese einmal in unserer Korrelationsmatrix
 iris_set$cluster <- as.factor(clusters$cluster)
-ggpairs(data = iris_set,
-        columns = c(1,2,3,4),
-        mapping = ggplot2::aes(colour = cluster),
-        title = "Korrelationsmatrix")
+ggplot(iris_set, aes(Petal.Length, Petal.Width, 
+                     color = cluster)) + 
+  geom_point()
 
-## Was wenn wir drei Clusters wollen wuerden?
-## (Weil wir wissen, dass es drei gibt, oder wir drei haben wollen
-## e.g. high-performer und low-performer)
+
+#
+
 
 # Und wir probieren nun mal 3 Clusters
 clusters <- kmeans(iris_set, 
@@ -410,10 +324,7 @@ clusters <- kmeans(iris_set,
                    nstart = 20)
 
 # Statistik ausgeben
-clusters$betweenss / clusters$totss
-# [1] 0.8858283
-
-## Sind wir jetzt besser? Klar, dass es immer besser wird.
+clusters
 
 # Schauen wir uns unsere neuen Centers an
 iris_set$cluster <- as.factor(clusters$cluster)
@@ -421,24 +332,20 @@ ggplot(iris_set, aes(Petal.Length, Petal.Width,
                      color = cluster)) + 
   geom_point()
 
-# Und jetzt schauen wir uns die Spezien dieser Blumen 
-# im urspruenglichen set an
 
-## Jaaa, die habe ich unterschlagen
 
+#
+
+
+# Korrekte Spezien der Blumen anzeigen
 ggplot(iris, aes(Petal.Length, Petal.Width, 
                      color = Species)) + 
                         geom_point()
 
-# Konfusionsmatrix anzeigen
-table(iris_set$cluster, 
-                iris$Species,
-                dnn = c("Prediction", "Reference"))
+
+#
 
 
-# Wrap-up
-# 1. Unsupervised Learning muss ohne Training auskommen
-# 2. k-means ist ein bekannter Clustering-Algorithmus
 
 # --------------------------------------------------------------------------
 # Frage: Ist das sonderbar?
@@ -458,10 +365,10 @@ raw_data %>% head()
 # Daten laden
 data(raw_data)
 
-## (Trend und Saisonalitaet werden bei diesem Algorithmus beruecksichtigt)
-## TODO:
-## Unterschied zwischen lokalen und globalen Anomalien herausfinden
-## (https://blog.twitter.com/engineering/en_us/a/2015/introducing-practical-and-robust-anomaly-detection-in-a-time-series.html)
+
+#
+
+
 
 # Anomaly Detection ausfuehren mit Twitter package
 result = AnomalyDetectionTs(raw_data, 
@@ -472,13 +379,20 @@ result = AnomalyDetectionTs(raw_data,
 # Plot anzeigen
 result$plot
 
+
+
+#
+
+
+
 # --------------------------------------------------------------------------
 # Frage: Was soll ich als nächstes tun?
 # Methode: Reinforcment Learning
 # --------------------------------------------------------------------------
 
+
 # Paket fuer modellfreies Reinforcement Learning installieren
-devtools::install_github("nproellochs/ReinforcementLearning")
+# devtools::install_github("nproellochs/ReinforcementLearning")
 library(ReinforcementLearning)
 
 # Beispiel Daten laden (100k zufaellig ausgewaelte Tic-Tac-Toe Spiele)
@@ -488,44 +402,52 @@ data(tictactoe)
 # (0 = Spiel laeuft weiter, -1 = X verliert, 1 = X gewinnt)
 head(tictactoe, 50)
 
+
+# --!
+
 # Parameter fuer Reinforcement Learning definieren
 control <- list(alpha = 0.1, gamma = 0.5, epsilon = 0.1)
 
 # Reinforcement learning ausfuehren
-# Achtung, das kann eine Weile dauern
-model <- ReinforcementLearning(tictactoe, s = "State", 
-                               a = "Action", 
-                              r = "Reward", 
-                               s_new = "NextState", 
-                              control = control)
+# (Achtung, das kann eine Weile dauern)
+# model <- ReinforcementLearning(tictactoe, s = "State", 
+#                                a = "Action", 
+#                               r = "Reward", 
+#                                s_new = "NextState", 
+#                               control = control)
+# saveRDS(model, "tic-tac-toe.rds")
 
-# Modell ausgeben
-print(model)
+model <- readRDS("tic-tac-toe.rds")
 
-# Policy ausgeben (bester Zug fuer entsprechendes State)
-policy(model)
+# --!
 
-# Beispiel fuer gelerntes Handel
 
-# State
+# Modell ausgeben mit bestem Zug fuer jeden Status
+print(model$Q)
+
+
+#
+
+
+# Beispiel fuer gelerntes Handel:
+
+# Momentaner Status
 #     B . .
 #     B X .
 #     . . X
 
-# Algorithmus nach Zug fragen
+# Algorithmus nach naechstem Zug fragen
 policy(model)["B..BX...X"]
 
-##  Vorgeschlagener Zug "c7" macht Sinn
 
-# Alternativ koennte das Lernen auch ueber eine Funktion 
-# gemacht werden, welche die Uebergaenge der Zustaende modelliert 
-# (see environment function)
+
+#
+
 
 # --------------------------------------------------------------------------
 # Frage: Was soll ich als naechstes tun?
 # Methode: Recommenders
 # --------------------------------------------------------------------------
-
 
 #install.packages("recommenderlab")
 #install.packages("data.table")
@@ -581,7 +503,5 @@ lapply(recommendations_list, getMovieTitle) %>% unlist
 lapply(ratings[ratings$userId == 1 & ratings$rating >= 3.5, ]$movieId,
        getMovieTitle) %>% unlist
 
-
-# Done, congrats!
 
 
