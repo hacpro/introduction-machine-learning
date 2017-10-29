@@ -66,9 +66,12 @@ kurtosis(buildings$price)
 #
 
 # --------------------------------------------------------------------------
-# Frage 1: Wieviel kostet ein Gebaeude?
+# Frage: Wieviel kostet ein Gebaeude?
+# Methode: Regression
 # (Einschaetzung von neuem Haus ohne Preisinformation)
 # --------------------------------------------------------------------------
+
+
 
 # Lineares Regressionsmodell erstellen
 lm_price <- lm(price ~ sqft, buildings)
@@ -81,7 +84,9 @@ ggplot(buildings, aes(sqft, price)) +
 # Kennzahlen ausgeben
 summary(lm_price)
 
+
 #
+
 
 # Regressionsmodell verfeinern
 lm_price2 <- lm(price ~ sqft + bath, buildings)
@@ -129,20 +134,19 @@ advanced_plot %>% add_trace(z = price_surface,
 # ------------------------------------------------------------------------
 
 
+
 # Anzeigen von Erhoehung, gruppiert nach Stadt
 df <- buildings
 df$in_sf <- as.factor(buildings[, 1])
 ggplot(df, aes(in_sf, elevation, colour = in_sf)) +
   geom_point(alpha = .2, size = 5)
 
+
 # 
 
 
 # Datensatz mit gewonnener Erkenntnis klassifizieren
 in_sf <- as.integer(as.logical(buildings$elevation > 73))
-
-
-# 
 
 
 # Richtige Kategorisierungen bestimmen
@@ -152,6 +156,7 @@ correct_classifications <- sum(classifications == T)
 
 # Prozent richtige bestimmen
 correct_classifications / all_classifications
+
 
 # 
 
@@ -197,14 +202,15 @@ ggpairs(data = df2, columns = c(4, 5, 6, 7, 8), title = "Korrelationsmatrix",
 #
 
 
-# Entscheidungsbaum (Decision Tree)
-
 # Schauen wir uns noch einmal unsere erste Regel (> 73ft) an
 fourfoldplot(table(Predicted=as.integer(buildings$elevation > 73), 
                     Actual=buildings$in_sf), 
              color = c("#CC6666", "#99CC99"),
              conf.level = 0, margin = 1, 
              main = "Confusion Matrix")
+
+
+#
 
 
 # Verschieben wir die Hoehengrenze nach unten
@@ -214,7 +220,13 @@ fourfoldplot(table(Predicted=as.integer(buildings$elevation > 40),
              conf.level = 0, margin = 1, 
              main = "Confusion Matrix")
 
+
 #
+
+
+
+# Entscheidungsbaum (Decision Tree)
+
 
 
 # Reproduzierbarkeit sicherstellen
@@ -237,7 +249,9 @@ confusionMatrix(in_sf_tree,
                 dnn = c("Prediction", "Reference"))
 
 
+
 #
+
 
 
 # Wir teilen unsere Daten in Training und Testset auf (70%/30%)
@@ -283,6 +297,7 @@ dtree_pruned <- prune(dtree, cp = .02679)
 # Frage: wie ist das organisiert?
 # Methode: Clustering
 # ------------------------------------------------------------------------
+
 
 
 # Wir schauen uns den Iris-Datensatz an. 
@@ -331,7 +346,6 @@ iris_set$cluster <- as.factor(clusters$cluster)
 ggplot(iris_set, aes(Petal.Length, Petal.Width, 
                      color = cluster)) + 
   geom_point()
-
 
 
 #
@@ -445,7 +459,7 @@ policy(model)["B..BX...X"]
 
 
 # --------------------------------------------------------------------------
-# Frage: Was soll ich als naechstes tun?
+# Vertiefung: Was soll ich als naechstes tun?
 # Methode: Recommenders
 # --------------------------------------------------------------------------
 
