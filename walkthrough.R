@@ -24,14 +24,29 @@ library(rpart.plot)
 library(datasets)
 
 
+#
+
+# Allfaellige Variablen aus Umgebung entfernen
+rm(list=ls())
+
+# Layout zuruecksetzen
+par(mfrow=c(1,1))
+
+# Reproduzierbarkeit sicherstellen
+set.seed(1234)
+
 # Arbeitsverzeichnis setzen
 setwd("c:/source/introduction-machine-learning")
+
+#
+
 
 # File zur Untersuchung laden
 buildings <- read.csv2("buildings.csv", sep = ",")
 
 # Eine Uebersicht der Daten  anzeigen
 View(buildings)
+
 
 #
 
@@ -228,10 +243,6 @@ fourfoldplot(table(Predicted=as.integer(buildings$elevation > 40),
 # Entscheidungsbaum (Decision Tree)
 
 
-
-# Reproduzierbarkeit sicherstellen
-set.seed(1234)
-
 # Klassischen Descision Tree erstellen
 dtree <- rpart(in_sf ~ ., buildings, 
                method = "class")
@@ -316,24 +327,22 @@ ggpairs(data = iris_set, title = "Korrelationsmatrix")
 
 
 
-# Wir lassen R einmal zwei Clusters erstellen
-clusters <- kmeans(iris_set, 
-                   2, # Anzahl erwarteter Cluster 
-                   nstart = 20)
-# Und schauen wir uns diese Clusters einmal an
-clusters
+# Wir berechnen die besten Anzahl von Clusters
 
-# Visualisieren wir diese einmal in unserer Korrelationsmatrix
-iris_set$cluster <- as.factor(clusters$cluster)
-ggplot(iris_set, aes(Petal.Length, Petal.Width, 
-                     color = cluster)) + 
-  geom_point()
+k_max <- 15
+wss <- sapply(1:k_max, 
+              function(k){kmeans(iris_set, k, nstart=10 )$tot.withinss})
+
+plot(1:k_max, wss,
+     type="b", pch = 19, frame = FALSE, 
+     xlab="Anzahl von Clusters",
+     ylab="Total Streuung innerhalb Clusters (SSE)")
 
 
 #
 
 
-# Und wir probieren nun mal 3 Clusters
+# Berechnen wir die 3 Cluster
 clusters <- kmeans(iris_set, 
                    3, # Anzahl erwarteter Cluster 
                    nstart = 20)
@@ -341,7 +350,7 @@ clusters <- kmeans(iris_set,
 # Statistik ausgeben
 clusters
 
-# Schauen wir uns unsere neuen Centers an
+# Visualisieren wir unsere Cluster
 iris_set$cluster <- as.factor(clusters$cluster)
 ggplot(iris_set, aes(Petal.Length, Petal.Width, 
                      color = cluster)) + 
@@ -365,6 +374,7 @@ ggplot(iris, aes(Petal.Length, Petal.Width,
 # Frage: Ist das sonderbar?
 # Methode: Anomaly detection algorithm
 # --------------------------------------------------------------------------
+
 
 # Library fuer Paketinstallation ab Github installieren
 # install.packages("devtools")
@@ -405,6 +415,7 @@ result$plot
 # --------------------------------------------------------------------------
 
 
+
 # Paket fuer modellfreies Reinforcement Learning installieren
 # devtools::install_github("nproellochs/ReinforcementLearning")
 library(ReinforcementLearning)
@@ -424,10 +435,10 @@ control <- list(alpha = 0.1, gamma = 0.5, epsilon = 0.1)
 
 # Reinforcement learning ausfuehren
 # (Achtung, das kann eine Weile dauern)
-# model <- ReinforcementLearning(tictactoe, s = "State", 
-#                                a = "Action", 
-#                               r = "Reward", 
-#                                s_new = "NextState", 
+# model <- ReinforcementLearning(tictactoe, s = "State",
+#                                a = "Action",
+#                               r = "Reward",
+#                                s_new = "NextState",
 #                               control = control)
 # saveRDS(model, "tic-tac-toe.rds")
 
