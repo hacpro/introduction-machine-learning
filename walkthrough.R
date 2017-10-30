@@ -78,6 +78,7 @@ lines(density(buildings$price),
 skewness(buildings$price)
 kurtosis(buildings$price)
 
+
 #
 
 # --------------------------------------------------------------------------
