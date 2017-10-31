@@ -78,7 +78,6 @@ lines(density(buildings$price),
 skewness(buildings$price)
 kurtosis(buildings$price)
 
-
 #
 
 # --------------------------------------------------------------------------
@@ -147,6 +146,7 @@ advanced_plot %>% add_trace(z = price_surface,
 
 # ------------------------------------------------------------------------
 # Frage: Ist ein Haus aus San Francisco oder New York?
+# Methode: 1. Inuition & Statistik, 2. Descision Tree
 # ------------------------------------------------------------------------
 
 
@@ -187,6 +187,16 @@ confusionMatrix(buildings$in_sf,
 # -> Kennzahlen
 
 
+# Korrelationsmatrix darstellen
+# (Wir entfernen kategoriale Variablen mit zu vielen Varianten)
+df2 <- buildings
+df2$in_sf <- as.factor(buildings[, 1])
+ggpairs(data = df2, columns = c(4, 5, 6, 7, 8), title = "Korrelationsmatrix",
+        mapping = ggplot2::aes(colour = in_sf))
+
+
+#
+
 
 # m2-Preis und Hohe darstellen nach Stadt
 ggplot(df, aes(price_per_sqft, elevation, colour = in_sf)) +
@@ -200,22 +210,14 @@ ggplot(df, aes(price_per_sqft, elevation, colour = in_sf)) +
 # Einzeichnen was wir inzwischen wissen
 ggplot(df, aes(price_per_sqft, elevation, colour = in_sf)) +
   geom_point(alpha = .5) + 
-  annotate("rect", xmin=0,xmax=Inf, ymin=73, ymax=Inf, alpha=0.2, fill="#00BFC4") + 
-  annotate("rect", xmin=2250,xmax=Inf, ymin=0, ymax=73, alpha=0.2, fill="#F8766D") 
+  annotate("rect", xmin=0,xmax=Inf, ymin=73, ymax=Inf, alpha=0.2, 
+           fill="#00BFC4") + 
+  annotate("rect", xmin=2250,xmax=Inf, ymin=0, ymax=73, alpha=0.2, 
+           fill="#F8766D") 
 
 
 #
 
-
-# Korrelationsmatrix darstellen
-# (Wir entfernen kategoriale Variablen mit zu vielen Varianten)
-df2 <- buildings
-df2$in_sf <- as.factor(buildings[, 1])
-ggpairs(data = df2, columns = c(4, 5, 6, 7, 8), title = "Korrelationsmatrix",
-        mapping = ggplot2::aes(colour = in_sf))
-
-
-#
 
 
 # Schauen wir uns noch einmal unsere erste Regel (> 73ft) an
@@ -248,12 +250,17 @@ fourfoldplot(table(Predicted=as.integer(buildings$elevation > 40),
 dtree <- rpart(in_sf ~ ., buildings, 
                method = "class")
 
-# Anhand von Modell Klassifizierung machen
-in_sf_tree <- predict(dtree, buildings, type = "class")
-
 
 # Schauen wir uns diesen Baum an (Vorteil von Descision Trees)
 rpart.plot(dtree)
+
+
+#
+
+
+# Anhand von Modell Klassifizierung machen
+in_sf_tree <- predict(dtree, buildings, type = "class")
+
 
 # Unser Resultat begutachten
 confusionMatrix(in_sf_tree, 
@@ -311,7 +318,6 @@ dtree_pruned <- prune(dtree, cp = .02679)
 # ------------------------------------------------------------------------
 
 
-
 # Wir schauen uns den Iris-Datensatz an. 
 iris_set <- iris[, -5]
 head(iris_set)
@@ -337,7 +343,7 @@ wss <- sapply(1:k_max,
 plot(1:k_max, wss,
      type="b", pch = 19, frame = FALSE, 
      xlab="Anzahl von Clusters",
-     ylab="Total Streuung innerhalb Clusters (SSE)")
+     ylab="Streuung innerhalb Clusters (SSE)")
 
 
 #
