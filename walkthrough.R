@@ -80,12 +80,12 @@ kurtosis(buildings$price)
 
 #
 
+
 # --------------------------------------------------------------------------
 # Frage: Wieviel kostet ein Gebaeude?
 # Methode: Regression
 # (Einschaetzung von neuem Haus ohne Preisinformation)
 # --------------------------------------------------------------------------
-
 
 
 # Lineares Regressionsmodell erstellen
@@ -94,7 +94,7 @@ lm_price <- lm(price ~ sqft, buildings)
 # Modell in Streudiagramm visualisieren
 ggplot(buildings, aes(sqft, price)) +
   geom_point() +
-  geom_smooth(method = "lm")
+  geom_smooth(method = "lm") 
 
 # Kennzahlen ausgeben
 summary(lm_price)
@@ -144,11 +144,11 @@ advanced_plot %>% add_trace(z = price_surface,
 # ------------------------------------------------------------------------
 
 
+
 # ------------------------------------------------------------------------
 # Frage: Ist ein Haus aus San Francisco oder New York?
 # Methode: 1. Inuition & Statistik, 2. Descision Tree
 # ------------------------------------------------------------------------
-
 
 
 # Anzeigen von Erhoehung, gruppiert nach Stadt
@@ -177,7 +177,7 @@ correct_classifications / all_classifications
 # 
 
 
-# Konfusionsmatrix erstellen
+# Weitere Kennzahlen ausgeben
 confusionMatrix(buildings$in_sf,
                 in_sf,
                 dnn = c("Prediction", "Reference"))
@@ -187,11 +187,12 @@ confusionMatrix(buildings$in_sf,
 # -> Kennzahlen
 
 
+
 # Korrelationsmatrix darstellen
 # (Wir entfernen kategoriale Variablen mit zu vielen Varianten)
 df2 <- buildings
 df2$in_sf <- as.factor(buildings[, 1])
-ggpairs(data = df2, columns = c(4, 5, 6, 7, 8), title = "Korrelationsmatrix",
+ggpairs(data = df2, columns = c(1,4, 5, 6, 7, 8), title = "Korrelationsmatrix",
         mapping = ggplot2::aes(colour = in_sf))
 
 
@@ -239,14 +240,11 @@ fourfoldplot(table(Predicted=as.integer(buildings$elevation > 40),
              main = "Confusion Matrix")
 
 
-#
+# 
 
 
 
-# Entscheidungsbaum (Decision Tree)
-
-
-# Klassischen Descision Tree erstellen
+# Klassischen Entscheidungsbaum (Descision Tree) erstellen
 dtree <- rpart(in_sf ~ ., buildings, 
                method = "class")
 
@@ -320,7 +318,7 @@ dtree_pruned <- prune(dtree, cp = .02679)
 
 # Wir schauen uns den Iris-Datensatz an. 
 iris_set <- iris[, -5]
-head(iris_set)
+View(iris_set)
 
 
 #
@@ -455,7 +453,7 @@ model <- readRDS("tic-tac-toe.rds")
 
 
 # Modell ausgeben mit bestem Zug fuer jeden Status
-print(model$Q)
+head(model$Q)
 
 
 #
@@ -470,7 +468,6 @@ print(model$Q)
 
 # Algorithmus nach naechstem Zug fragen
 policy(model)["B..BX...X"]
-
 
 
 #
