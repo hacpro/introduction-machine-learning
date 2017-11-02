@@ -88,13 +88,16 @@ kurtosis(buildings$price)
 # --------------------------------------------------------------------------
 
 
+
+
+
 # Lineares Regressionsmodell erstellen
 lm_price <- lm(price ~ sqft, buildings)
 
 # Modell in Streudiagramm visualisieren
 ggplot(buildings, aes(sqft, price)) +
   geom_point() +
-  geom_smooth(method = "lm") 
+  geom_smooth(method = "loess") 
 
 # Kennzahlen ausgeben
 summary(lm_price)
@@ -151,6 +154,12 @@ advanced_plot %>% add_trace(z = price_surface,
 # ------------------------------------------------------------------------
 
 
+
+
+
+
+
+
 # Anzeigen von Erhoehung, gruppiert nach Stadt
 df <- buildings
 df$in_sf <- as.factor(buildings[, 1])
@@ -163,6 +172,8 @@ ggplot(df, aes(in_sf, elevation, colour = in_sf)) +
 
 # Datensatz mit gewonnener Erkenntnis klassifizieren
 in_sf <- as.integer(as.logical(buildings$elevation > 73))
+
+
 
 
 # Richtige Kategorisierungen bestimmen
@@ -181,6 +192,8 @@ correct_classifications / all_classifications
 confusionMatrix(buildings$in_sf,
                 in_sf,
                 dnn = c("Prediction", "Reference"))
+
+
 
 
 
@@ -316,6 +329,9 @@ dtree_pruned <- prune(dtree, cp = .02679)
 # ------------------------------------------------------------------------
 
 
+
+
+
 # Wir schauen uns den Iris-Datensatz an. 
 iris_set <- iris[, -5]
 View(iris_set)
@@ -381,6 +397,7 @@ ggplot(iris, aes(Petal.Length, Petal.Width,
 # --------------------------------------------------------------------------
 
 
+
 # Library fuer Paketinstallation ab Github installieren
 # install.packages("devtools")
  
@@ -396,6 +413,7 @@ data(raw_data)
 
 
 #
+
 
 
 
@@ -418,6 +436,8 @@ result$plot
 # Frage: Was soll ich als nächstes tun?
 # Methode: Reinforcment Learning
 # --------------------------------------------------------------------------
+
+
 
 
 
@@ -491,6 +511,10 @@ movies_and_genres <- read.csv("movielens-datasets/movies_and_genres.csv",
                               stringsAsFactors=FALSE) 
 
 
+#
+
+
+
 # Aus ratings eine Matrix machen 
 # (Rows = userId, Columns = movieId)
 ratingmat <- dcast(ratings, userId~movieId, 
@@ -504,6 +528,11 @@ ratingmat <- as(ratingmat, "realRatingMatrix")
 # Normalisieren der Daten
 ratingmat_norm <- normalize(ratingmat)
 
+
+#
+
+
+
 # UBFC Recommender Model erzeugen 
 # (UBCF stands for User-Based Collaborative Filtering)
 # Similarity Calculation Method: Cosine Similarity
@@ -511,6 +540,11 @@ recommender_model <- Recommender(ratingmat_norm,
                                  method = "UBCF", 
                                  param=list(method="Cosine",
                                             nn=30))
+
+
+#
+
+
 
 # Die top 10 Empfehlungen fuer Benutzer 1 in ratingset bestimmen
 recommendations <- predict(recommender_model, 
@@ -528,9 +562,15 @@ getMovieTitle <- function(id)
 # Was das System dem Benutzer 1 vorschlagen wuerde
 lapply(recommendations_list, getMovieTitle) %>% unlist
 
+
+
+#
+
+
 # Welche Filme der User bereits mit einer Bewertung >= 3.5 bewertet hat
 lapply(ratings[ratings$userId == 1 & ratings$rating >= 3.5, ]$movieId,
        getMovieTitle) %>% unlist
 
 
 
+#
