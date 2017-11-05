@@ -1,0 +1,6 @@
+Setup Mac
+###########
+
+1. https://cran.r-project.org/bin/macosx/ download the base distribution 
+2. https://www.xquartz.org/ dmg File herunterladen und installieren.
+3. Beim ersten laufenlassen der Scripts die install commands auskommentieren. 
