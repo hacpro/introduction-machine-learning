@@ -1,55 +1,26 @@
-
-# Benoetigte Packete installieren
-#install.packages("RODBC")
-#install.packages("data.table") # fuer die SQL-Freunde unter uns
-
-install.packages("RPostgreSQL")
+#install.packages("RPostgreSQL")
 require("RPostgreSQL")
 
+# create a connection
+# save the password that we can "hide" it as best as we can by collapsing it
+pw <- {
+  ""
+}
+ 
+# loads the PostgreSQL driver
+drv <- dbDriver("PostgreSQL")
+# creates a connection to the postgres database
+# note that "con" will be used later in each connection to the database
+con <- dbConnect(drv, dbname = "rem2",
+                 host = "localhost", port = 5432,
+                 user = "mee", password = pw)
+rm(pw) # removes the password
 
-# Pakete inkludieren
-#library(RODBC)
-#library(data.table)
+# Alle Mietvertraege selektieren
 
-# Verbindung aufbauen
-# connection <- odbcDriverConnect('driver={PostgreSQL};server=sqlrem;database=pke-test;trusted_connection=true')
+df_postgres <- dbGetQuery(con, "SELECT id mietbeginn, haftung_bis, zahlmodus_cd, verbucht_bis, type, hauptmieter_id, hauptobjekt_id, mietvertrag_id from mietvertraege limit 10")
 
-# # Tabelle holen
-# mietzinse <- sqlQuery(connection, "select mz.GueltigAb ,mz.BetragNetto, abr.KantonCD, 
-# 		                  abr.Ort,
-#                       abr.Bezeichnung1, 
-#                       art.Bez,
-#                       art.ObjektKategorieCD,
-#                       o.AnzahlZimmerCD
-#                       from Mietzins mz
-#                       join Objekt o on mz.ObjektOID = o.OID
-#                       join Haus h on o.HausOID = h.OID
-#                       join AbrechEinheit abr on abr.OID = h.AbrechEinheitOID
-#                       join ObjektArt art on art.OID = o.ObjektArtOID
-#                       where GueltigAb > \'2000-01-01\'
-#                       and GueltigAb < \'2017-01-01\'
-#                       order by Ort")
-
-# # In data.table verwandeln, damit wir im bekannten Terrain sind
-# mietzinse_table <- na.omit(data.table(mietzinse))
-
-# # Summary ausgeben
-# nrow(mietzinse_table)
-# summary(mietzinse_table)
-
-# # Jahr-Spalte einfuehren
-# mietzinse_table$Jahr <- format(mietzinse_table$GueltigAb, "%Y")
-
-# ## DT[i, j, by]
-# ##   R:      i                 j        by
-# ## SQL:  where   select | update | group by
-# ## (Take DT, subset rows using i, then calculate j, grouped by by.)
-
-# # Sortieren, Filtern, Berechnen und Gruppieren
-# mietzins_aggregated <- mietzinse_table[order(Jahr, AnzahlZimmerCD == 3.5), mean(BetragNetto), by = Jahr]
-
-# # Default-Plot erstellen
-# plot(mietzins_aggregated)
-
-# # Verbindung wieder schliessen
-# close(connection)
+ 
+# check for the cartable
+dbExistsTable(con, "mietvertraege")
+# TRUE
